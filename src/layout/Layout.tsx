@@ -1,8 +1,19 @@
+import React from "react";
 import { NavLink } from "react-router";
 
-const Layout = () => {
+const Layout: React.FC<{
+  setIsDarkMode: React.Dispatch<React.SetStateAction<boolean>>;
+  isDarkMode: boolean;
+}> = ({ setIsDarkMode, isDarkMode }) => {
+  const toggle_theme = () => {
+    setIsDarkMode((prev) => {
+      console.log(prev);
+      return !prev;
+    });
+  };
+
   return (
-    <header className="max-h-[150px] min-h-[100px] w-[100dvw] flex items-center justify-evenly font-title">
+    <header className="max-h-[150px] min-h-[100px] w-[100dvw] flex items-center justify-evenly font-title bg-background text-text-color">
       <NavLink to="/" className="">
         LOGO
       </NavLink>
@@ -20,8 +31,10 @@ const Layout = () => {
           </NavLink>
         </li>
       </ul>
-      <div>
-        <button>Mode</button>
+      <div className="flex items-center gap-4 justify-center">
+        <button className="cursor-pointer" onClick={toggle_theme}>
+          {isDarkMode ? "Light" : "Dark"}
+        </button>
         <button>ENG/ESP</button>
       </div>
     </header>

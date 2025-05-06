@@ -1,6 +1,22 @@
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 body {
   font-family: "Montserrat", sans-serif;
+}
+
+@theme {
+  --color-background: var(--background);
+  --color-text-color: var(--text);
+}
+
+:root {
+  --background: #ffffff;
+  --text: #121212;
+}
+
+.dark {
+  --background: #121212;
+  --text: #dddddd;
 }
