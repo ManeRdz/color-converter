@@ -9,14 +9,19 @@ body {
 @theme {
   --color-background: var(--background);
   --color-text-color: var(--text);
+  --color-main-coor: var(--main-color);
+  --color-card-color: var(--card-color);
 }
 
 :root {
   --background: #ffffff;
-  --text: #121212;
+  --text: #1a1a1a;
+  --main-color: #6277eb;
+  --card-color: #fcfcfc;
 }
 
 .dark {
-  --background: #121212;
+  --background: #060606;
   --text: #dddddd;
+  --card-color: #131313;
 }
