@@ -38,7 +38,7 @@ const Layout: React.FC<LayoutProps> = ({ theme, setTheme }) => {
   };
 
   return (
-    <header className="max-h-[150px] min-h-[100px] w-[100dvw] flex items-center justify-evenly font-title bg-background text-text-color">
+    <header className="max-h-[150px] min-h-[100px] w-[100dvw] fixed flex items-center justify-evenly font-title bg-background text-text-color">
       <NavLink to="/color-converter" className="">
         LOGO
       </NavLink>

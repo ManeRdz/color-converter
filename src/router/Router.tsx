@@ -1,9 +1,10 @@
 import { Routes, Route } from "react-router";
+import ColorConverter from "../pages/ColorConverter";
 const Router = () => {
   return (
     <>
       <Routes>
-        <Route path="/" element={<></>} />
+        <Route path="/color-converter" element={<ColorConverter />} />
       </Routes>
     </>
   );

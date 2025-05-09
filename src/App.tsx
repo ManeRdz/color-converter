@@ -46,8 +46,10 @@ function App() {
   return (
     <BrowserRouter>
       <LanguageContextProvider>
-        <Layout setTheme={setTheme} theme={theme} />
-        <Router />
+        <div className="relative">
+          <Layout setTheme={setTheme} theme={theme} />
+          <Router />
+        </div>
       </LanguageContextProvider>
     </BrowserRouter>
   );
