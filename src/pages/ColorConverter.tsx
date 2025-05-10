@@ -26,7 +26,7 @@ const ColorConverter = () => {
     "rgb" | "hex" | "hsl" | "cmyk"
   >("rgb");
 
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
   const changeColor = (color: RgbColor): void => {
     setRGBColor(color);

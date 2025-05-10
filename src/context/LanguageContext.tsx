@@ -19,7 +19,7 @@ export const LanguageContextProvider = ({ children }: ContextProviderProps) => {
   };
   const [language, setLanguage] = useState<Languages>(getInitialLanguage);
 
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
 
   useEffect(() => {
     localStorage.setItem("language", language);
