@@ -9,19 +9,25 @@ body {
 @theme {
   --color-background: var(--background);
   --color-text-color: var(--text);
-  --color-main-coor: var(--main-color);
+  --color-secondary-text-color: var(--secondary-text);
+  --color-main-color: var(--main-color);
   --color-card-color: var(--card-color);
+  --color-input-color: var(--input-color);
 }
 
 :root {
   --background: #ffffff;
   --text: #1a1a1a;
+  --secondary-text: #5e5e5e;
   --main-color: #6277eb;
-  --card-color: #fcfcfc;
+  --card-color: #fafafa;
+  --input-color: var(--color-gray-200);
 }
 
 .dark {
   --background: #060606;
   --text: #dddddd;
+  --secondary-text: #9c9c9c;
   --card-color: #131313;
+  --input-color: var(--color-neutral-700);
 }

@@ -38,7 +38,7 @@ const Layout: React.FC<LayoutProps> = ({ theme, setTheme }) => {
   };
 
   return (
-    <header className="max-h-[150px] min-h-[100px] w-[100dvw] fixed flex items-center justify-evenly font-title bg-background text-text-color">
+    <header className="shadow-sm max-h-[150px] min-h-[100px] w-[100dvw] fixed flex items-center justify-evenly font-title bg-background text-text-color">
       <NavLink to="/color-converter" className="">
         LOGO
       </NavLink>
@@ -46,13 +46,13 @@ const Layout: React.FC<LayoutProps> = ({ theme, setTheme }) => {
         <li>
           <NavLink to="/color-converter" className="relative w-full group">
             {t("colorConverter")}
-            <span className="absolute left-1/2 -bottom-1 h-0.5 w-0 bg-main-coor transition-all duration-300 ease-in-out group-hover:left-0 group-hover:w-full" />
+            <span className="absolute left-1/2 -bottom-1 h-0.5 w-0 bg-main-color transition-all duration-300 ease-in-out group-hover:left-0 group-hover:w-full" />
           </NavLink>
         </li>
         <li>
           <NavLink to="/blog" className="relative w-full group">
             Blog
-            <span className="absolute left-1/2 -bottom-1 h-0.5 w-0 bg-main-coor transition-all duration-300 ease-in-out group-hover:left-0 group-hover:w-full" />
+            <span className="absolute left-1/2 -bottom-1 h-0.5 w-0 bg-main-color transition-all duration-300 ease-in-out group-hover:left-0 group-hover:w-full" />
           </NavLink>
         </li>
       </ul>

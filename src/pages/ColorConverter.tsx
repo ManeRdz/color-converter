@@ -1,154 +1,98 @@
 import { useEffect, useState } from "react";
 import { HslColor, RgbColor, RgbColorPicker } from "react-colorful";
+import { useTranslation } from "react-i18next";
+import { ColorHandler } from "../utils/ColorHandler";
+import { CMYKColor } from "../types";
+import { MdOutlineContentCopy } from "react-icons/md";
 
 const ColorConverter = () => {
+  const colorHandler = new ColorHandler();
+
   const [RGBColor, setRGBColor] = useState<RgbColor>({
     r: 255,
     g: 0,
     b: 0,
   });
-  const [HSLColor, setHSLColor] = useState<HslColor>(rgbToHsl(RGBColor));
-  const [HEXColor, setHEXColor] = useState<string>(rgbToHex(RGBColor));
-  const [lastChanged, setLastChanged] = useState<"rgb" | "hex">("rgb");
+  const [HSLColor, setHSLColor] = useState<HslColor>(
+    colorHandler.rgbToHsl(RGBColor)
+  );
+  const [HEXColor, setHEXColor] = useState<string>(
+    colorHandler.rgbToHex(RGBColor)
+  );
+  const [CMYKColor, setCMYKColor] = useState<CMYKColor>(
+    colorHandler.rgbToCmyk(RGBColor)
+  );
+  const [lastChanged, setLastChanged] = useState<
+    "rgb" | "hex" | "hsl" | "cmyk"
+  >("rgb");
 
-  function rgbToHex({ r, g, b }: { r: number; g: number; b: number }) {
-    return [r, g, b]
-      .map((x) => {
-        const hex = x.toString(16);
-        return hex.length === 1 ? "0" + hex : hex;
-      })
-      .join("");
-  }
+  const { t, i18n } = useTranslation();
 
-  function rgbToHsl({ r, g, b }: { r: number; g: number; b: number }) {
-    if (isNaN(r) || isNaN(g) || isNaN(b)) {
-      return { h: 0, s: 0, l: 0 };
-    }
-
-    r /= 255;
-    g /= 255;
-    b /= 255;
-
-    const max = Math.max(r, g, b),
-      min = Math.min(r, g, b);
-    let h = 0,
-      s = 0,
-      l = (max + min) / 2;
-
-    if (max !== min) {
-      const d = max - min;
-      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-      switch (max) {
-        case r:
-          h = (g - b) / d + (g < b ? 6 : 0);
-          break;
-        case g:
-          h = (b - r) / d + 2;
-          break;
-        case b:
-          h = (r - g) / d + 4;
-          break;
-      }
-      h /= 6;
-    }
-
-    return {
-      h: Math.round(h * 360),
-      s: Math.round(s * 100),
-      l: Math.round(l * 100),
-    };
-  }
-
-  function hexToRgb(hex: string) {
-    hex = hex.replace("#", "");
-
-    if (!hex || !/^[0-9A-Fa-f]{3,6}$/.test(hex)) {
-      return { r: 0, g: 0, b: 0 };
-    }
-
-    let paddedHex = hex;
-    if (hex.length < 6) {
-      paddedHex = hex.padEnd(6, "0");
-    }
-
-    if (paddedHex.length === 3) {
-      paddedHex = paddedHex
-        .split("")
-        .map((char) => char + char)
-        .join("");
-    }
-
-    const r = parseInt(paddedHex.substring(0, 2), 16);
-    const g = parseInt(paddedHex.substring(2, 4), 16);
-    const b = parseInt(paddedHex.substring(4, 6), 16);
-
-    return { r, g, b };
-  }
-
-  function hexToHsl(hex: string) {
-    const { r, g, b } = hexToRgb(hex);
-
-    const rNorm = r / 255;
-    const gNorm = g / 255;
-    const bNorm = b / 255;
-
-    const max = Math.max(rNorm, gNorm, bNorm);
-    const min = Math.min(rNorm, gNorm, bNorm);
-    let h = 0;
-    let s = 0;
-    const l = (max + min) / 2;
-
-    if (max !== min) {
-      const delta = max - min;
-      s = l > 0.5 ? delta / (2 - max - min) : delta / (max + min);
-
-      switch (max) {
-        case rNorm:
-          h = (gNorm - bNorm) / delta + (gNorm < bNorm ? 6 : 0);
-          break;
-        case gNorm:
-          h = (bNorm - rNorm) / delta + 2;
-          break;
-        case bNorm:
-          h = (rNorm - gNorm) / delta + 4;
-          break;
-      }
-      h /= 6;
-    }
-
-    // Convertir a grados y porcentajes
-    return {
-      h: Math.round(h * 360),
-      s: Math.round(s * 100),
-      l: Math.round(l * 100),
-    };
-  }
-
-  const changeColor = (color: RgbColor) => {
+  const changeColor = (color: RgbColor): void => {
     setRGBColor(color);
-    setHEXColor(rgbToHex(color));
-    setHSLColor(rgbToHsl(color));
+    setHEXColor(colorHandler.rgbToHex(color));
+    setHSLColor(colorHandler.rgbToHsl(color));
+    setCMYKColor(colorHandler.rgbToCmyk(color));
   };
 
   const changeRGBInputColor = (
-    value: string,
+    channel: string,
     e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  ): void => {
     const inputValue = e.target.value;
 
-    if (/^\d{0,3}$/.test(inputValue)) {
-      setLastChanged("rgb");
-      if (value === "r") {
-        setRGBColor((prev) => ({ ...prev, r: Number(inputValue) }));
-      } else if (value === "g") {
-        setRGBColor((prev) => ({ ...prev, g: Number(inputValue) }));
-      } else if (value === "b") {
-        setRGBColor((prev) => ({ ...prev, b: Number(inputValue) }));
-      }
+    if (!/^\d{0,3}$/.test(inputValue)) return;
+
+    if (inputValue === "") {
+      setRGBColor((prev) => ({ ...prev, [channel]: 0 })); // o dejarlo sin actualizar
+      return;
+    }
+
+    const numericValue = parseInt(inputValue, 10);
+
+    if (!isNaN(numericValue) && numericValue >= 0 && numericValue <= 255) {
+      setRGBColor((prev) => ({ ...prev, [channel]: numericValue }));
     }
   };
 
-  const changeHEXInputColor = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const changeHSLColor = (
+    value: string,
+    e: React.ChangeEvent<HTMLInputElement>
+  ): void => {
+    const inputValue = e.target.value;
+
+    if (!/^\d{0,3}$/.test(inputValue)) return;
+
+    if (inputValue === "") {
+      setHSLColor((prev) => ({ ...prev, [value]: 0 }));
+      return;
+    }
+
+    const numericValue = parseInt(inputValue, 10);
+    if (isNaN(numericValue)) return;
+
+    let isValid = false;
+
+    if (value === "h" && numericValue >= 0 && numericValue <= 360) {
+      isValid = true;
+      setHSLColor((prev) => ({ ...prev, h: numericValue }));
+    } else if (
+      (value === "s" || value === "l") &&
+      numericValue >= 0 &&
+      numericValue <= 100
+    ) {
+      isValid = true;
+      setHSLColor((prev) => ({ ...prev, [value]: numericValue }));
+    }
+
+    if (isValid) {
+      setLastChanged("hsl");
+    }
+  };
+
+  const changeHEXInputColor = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ): void => {
     const inputValue = e.target.value;
 
     if (inputValue === "" || /^[0-9A-Fa-f]{0,6}$/.test(inputValue)) {
@@ -157,100 +101,246 @@ const ColorConverter = () => {
     }
   };
 
+  const changeCMYKInputColor = (
+    value: string,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const inputValue = e.target.value;
+
+    if (!/^\d{0,3}$/.test(inputValue)) return;
+
+    if (inputValue === "") {
+      setCMYKColor((prev) => ({ ...prev, [value]: 0 }));
+      return;
+    }
+
+    const numericValue = parseInt(inputValue, 10);
+    if (isNaN(numericValue)) return;
+
+    if (numericValue >= 0 && numericValue <= 100) {
+      setCMYKColor((prev) => ({ ...prev, [value]: numericValue }));
+      setLastChanged("cmyk");
+    }
+  };
+
+  const setRandomColor = (): void => {
+    const randomR: number = Math.floor(Math.random() * 256);
+    const randomG: number = Math.floor(Math.random() * 256);
+    const randomB: number = Math.floor(Math.random() * 256);
+
+    const randomRGBColor: RgbColor = { r: randomR, g: randomG, b: randomB };
+
+    changeColor(randomRGBColor);
+  };
+
   useEffect(() => {
     if (lastChanged === "rgb") {
-      setHEXColor(rgbToHex(RGBColor));
-      setHSLColor(rgbToHsl(RGBColor));
+      setHEXColor(colorHandler.rgbToHex(RGBColor));
+      setHSLColor(colorHandler.rgbToHsl(RGBColor));
+      setCMYKColor(colorHandler.rgbToCmyk(RGBColor));
     }
   }, [RGBColor, lastChanged]);
 
   useEffect(() => {
     if (lastChanged === "hex") {
-      setRGBColor(hexToRgb(HEXColor));
-      setHSLColor(hexToHsl(HEXColor));
+      setRGBColor(colorHandler.hexToRgb(HEXColor));
+      setHSLColor(colorHandler.hexToHsl(HEXColor));
+      setCMYKColor(colorHandler.hexToCmyk(HEXColor));
     }
   }, [HEXColor, lastChanged]);
 
+  useEffect(() => {
+    if (lastChanged === "hsl") {
+      setRGBColor(colorHandler.hslToRgb(HSLColor));
+      setHEXColor(colorHandler.hslToHex(HSLColor));
+      setCMYKColor(colorHandler.hslToCmyk(HSLColor));
+    }
+  }, [HSLColor, lastChanged]);
+
+  useEffect(() => {
+    if (lastChanged === "cmyk") {
+      setRGBColor(colorHandler.cmykToRgb(CMYKColor));
+      setHEXColor(colorHandler.cmykToHex(CMYKColor));
+      setHSLColor(colorHandler.cmykToHsl(CMYKColor));
+    }
+  }, [CMYKColor, lastChanged]);
+
   return (
-    <div className="dark:bg-background min-h-[100dvh] flex items-center justify-center">
-      <div className="bg-card-color p-2 flex items-start gap-10 w-[800px]">
-        <div>
-          <RgbColorPicker
-            color={RGBColor}
-            onChange={(color) => changeColor(color)}
-          />
+    <div className="dark:bg-background min-h-[100dvh] flex items-center justify-center max-md:pt-32">
+      <div className="bg-card-color shadow-sm p-8 flex flex-col items-start justify-center gap-6 w-[50%] max-lg:w-[90%] max-md:w-[95%]">
+        <div className="flex justify-center items-start flex-col">
+          <h1 className="text-2xl font-bold text-text-color">
+            {t("colorConverter")}
+          </h1>
+          <h3 className="text-sm text-secondary-text-color">
+            {t("colorConverterDescription")}
+          </h3>
         </div>
-        <div className="flex items-center justify-start flex-wrap gap-8">
-          <div className="flex items-center justify-center gap-2">
-            <p className="text-text-color">RGB (</p>
-            <input
-              type="text"
-              value={RGBColor.r}
-              onChange={(e) => changeRGBInputColor("r", e)}
-              maxLength={3}
-              placeholder="Enter a number"
-              className="text-text-color w-10 bg-neutral-700 pl-1 rounded-sm outline-0"
-            />
-            <span className="text-text-color">,</span>
-            <input
-              type="text"
-              value={RGBColor.g}
-              onChange={(e) => changeRGBInputColor("g", e)}
-              maxLength={3}
-              placeholder="Enter a number"
-              className="text-text-color w-10 bg-neutral-700 pl-1 rounded-sm outline-0"
-            />
-            <span className="text-text-color">,</span>
-            <input
-              type="text"
-              value={RGBColor.b}
-              onChange={(e) => changeRGBInputColor("b", e)}
-              maxLength={3}
-              placeholder="Enter a number"
-              className="text-text-color w-10 bg-neutral-700 pl-1 rounded-sm outline-0"
-            />
-            <p className="text-text-color">)</p>
-          </div>
-          <div className="flex items-center justify-center gap-2">
-            <p className="text-text-color">HEX #</p>
-            <input
-              type="text"
-              value={HEXColor}
-              onChange={changeHEXInputColor}
-              maxLength={6}
-              placeholder="Enter a number"
-              className="text-text-color w-20 bg-neutral-700 pl-1 rounded-sm outline-0"
+        <div className="flex items-startjustify-start flex-wrap gap-8 w-[100%]">
+          <div className="w-[300px]">
+            <RgbColorPicker
+              color={RGBColor}
+              style={{ width: "300px", height: "300px" }}
+              onChange={(color) => changeColor(color)}
             />
           </div>
-          <div className="flex items-center justify-center gap-2">
-            <p className="text-text-color">HSL (</p>
-            <input
-              type="text"
-              value={HSLColor.h}
-              onChange={(e) => changeRGBInputColor("r", e)}
-              maxLength={3}
-              placeholder="Enter a number"
-              className="text-text-color w-10 bg-neutral-700 pl-1 rounded-sm outline-0"
-            />
-            <span className="text-text-color">,</span>
-            <input
-              type="text"
-              value={HSLColor.s}
-              onChange={(e) => changeRGBInputColor("g", e)}
-              maxLength={3}
-              placeholder="Enter a number"
-              className="text-text-color w-10 bg-neutral-700 pl-1 rounded-sm outline-0"
-            />
-            <span className="text-text-color">% ,</span>
-            <input
-              type="text"
-              value={HSLColor.l}
-              onChange={(e) => changeRGBInputColor("b", e)}
-              maxLength={3}
-              placeholder="Enter a number"
-              className="text-text-color w-10 bg-neutral-700 pl-1 rounded-sm outline-0"
-            />
-            <p className="text-text-color">% )</p>
+          <div className="flex flex-col items-start justify-center gap-10 w-[400px]">
+            <div className="flex items-center justify-start flex-wrap gap-8">
+              <div className="flex items-center justify-start flex-wrap gap-2">
+                <div className="flex items-center justify-center gap-2">
+                  <div
+                    className="w-5 h-5 shadow-md"
+                    style={{
+                      backgroundColor: `rgb(${RGBColor.r}, ${RGBColor.g}, ${RGBColor.b})`,
+                    }}
+                  ></div>
+                  <p className="text-text-color max-md:text-sm">RGB (</p>
+                </div>
+                <div className="flex items-center justify-center gap-2">
+                  <input
+                    type="text"
+                    value={RGBColor.r}
+                    onChange={(e) => changeRGBInputColor("r", e)}
+                    maxLength={3}
+                    placeholder="Enter a number"
+                    className="text-text-color w-10 bg-input-color pl-1 rounded-sm outline-0"
+                  />
+                  <span className="text-text-color max-md:text-sm">,</span>
+                  <input
+                    type="text"
+                    value={RGBColor.g}
+                    onChange={(e) => changeRGBInputColor("g", e)}
+                    maxLength={3}
+                    placeholder="Enter a number"
+                    className="text-text-color w-10 bg-input-color pl-1 rounded-sm outline-0"
+                  />
+                  <span className="text-text-color max-md:text-sm">,</span>
+                  <input
+                    type="text"
+                    value={RGBColor.b}
+                    onChange={(e) => changeRGBInputColor("b", e)}
+                    maxLength={3}
+                    placeholder="Enter a number"
+                    className="text-text-color w-10 bg-input-color pl-1 rounded-sm outline-0"
+                  />
+                  <p className="text-text-color max-md:text-sm">)</p>
+                  <MdOutlineContentCopy className="cursor-pointer text-neutral-700" />
+                </div>
+              </div>
+              <div className="flex items-center justify-center gap-2">
+                <div
+                  className="w-5 h-5 shadow-md"
+                  style={{
+                    backgroundColor: `rgb(${RGBColor.r}, ${RGBColor.g}, ${RGBColor.b})`,
+                  }}
+                ></div>
+                <p className="text-text-color max-md:text-sm">HEX #</p>
+                <input
+                  type="text"
+                  value={HEXColor}
+                  onChange={changeHEXInputColor}
+                  maxLength={6}
+                  placeholder="Enter a number"
+                  className="text-text-color w-20 bg-input-color pl-1 rounded-sm outline-0"
+                />
+                <MdOutlineContentCopy className="cursor-pointer text-neutral-700" />
+              </div>
+              <div className="flex items-center justify-center gap-2">
+                <div
+                  className="w-5 h-5 shadow-md"
+                  style={{
+                    backgroundColor: `rgb(${RGBColor.r}, ${RGBColor.g}, ${RGBColor.b})`,
+                  }}
+                ></div>
+
+                <p className="text-text-color max-md:text-sm">HSL (</p>
+                <input
+                  type="text"
+                  value={HSLColor.h}
+                  onChange={(e) => changeHSLColor("h", e)}
+                  maxLength={3}
+                  placeholder="Enter a number"
+                  className="text-text-color w-10 bg-input-color pl-1 rounded-sm outline-0"
+                />
+                <span className="text-text-color max-md:text-sm">,</span>
+                <input
+                  type="text"
+                  value={HSLColor.s}
+                  onChange={(e) => changeHSLColor("s", e)}
+                  maxLength={3}
+                  placeholder="Enter a number"
+                  className="text-text-color w-10 bg-input-color pl-1 rounded-sm outline-0"
+                />
+                <span className="text-text-color max-md:text-sm">% ,</span>
+                <input
+                  type="text"
+                  value={HSLColor.l}
+                  onChange={(e) => changeHSLColor("l", e)}
+                  maxLength={3}
+                  placeholder="Enter a number"
+                  className="text-text-color w-10 bg-input-color pl-1 rounded-sm outline-0"
+                />
+                <p className="text-text-color max-md:text-sm">% )</p>
+                <MdOutlineContentCopy className="cursor-pointer text-neutral-700" />
+              </div>
+              <div className="flex items-center justify-start flex-wrap gap-2">
+                <div className="flex items-center justify-center gap-1">
+                  <div
+                    className="w-5 h-5 shadow-md"
+                    style={{
+                      backgroundColor: `rgb(${RGBColor.r}, ${RGBColor.g}, ${RGBColor.b})`,
+                    }}
+                  ></div>
+                  <p className="text-text-color max-md:text-sm">CMYK</p>
+                </div>
+                <div className="flex items-center justify-center">
+                  <span className="text-text-color max-md:text-sm">( </span>
+                  <input
+                    type="text"
+                    value={CMYKColor.c}
+                    onChange={(e) => changeCMYKInputColor("c", e)}
+                    maxLength={3}
+                    placeholder="Enter a number"
+                    className="text-text-color w-10 bg-input-color pl-1 rounded-sm outline-0"
+                  />
+                  <span className="text-text-color max-md:text-sm">% ,</span>
+                  <input
+                    type="text"
+                    value={CMYKColor.m}
+                    onChange={(e) => changeCMYKInputColor("m", e)}
+                    maxLength={3}
+                    placeholder="Enter a number"
+                    className="text-text-color w-10 bg-input-color pl-1 rounded-sm outline-0"
+                  />
+                  <span className="text-text-color max-md:text-sm">% ,</span>
+                  <input
+                    type="text"
+                    value={CMYKColor.y}
+                    onChange={(e) => changeCMYKInputColor("y", e)}
+                    maxLength={3}
+                    placeholder="Enter a number"
+                    className="text-text-color w-10 bg-input-color pl-1 rounded-sm outline-0"
+                  />
+                  <span className="text-text-color max-md:text-sm">% ,</span>
+                  <input
+                    type="text"
+                    value={CMYKColor.k}
+                    onChange={(e) => changeCMYKInputColor("k", e)}
+                    maxLength={3}
+                    placeholder="Enter a number"
+                    className="text-text-color w-10 bg-input-color pl-1 rounded-sm outline-0"
+                  />
+                  <p className="text-text-color max-md:text-sm">%)</p>
+                  <MdOutlineContentCopy className="ml-2 cursor-pointer text-neutral-700" />
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={setRandomColor}
+              className="bg-blue-500 text-neutral-100 cursor-pointer hover:bg-blue-600 transition-all ease-in rounded-sm p-2 text-sm"
+            >
+              {t("randomColorButton")}
+            </button>
           </div>
         </div>
       </div>
