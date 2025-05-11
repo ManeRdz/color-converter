@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { HslColor, RgbColor, RgbColorPicker } from "react-colorful";
 import { useTranslation } from "react-i18next";
 import { ColorHandler } from "../utils/ColorHandler";
@@ -22,17 +22,35 @@ const ColorConverter = () => {
   const [CMYKColor, setCMYKColor] = useState<CMYKColor>(
     colorHandler.rgbToCmyk(RGBColor)
   );
-  const [lastChanged, setLastChanged] = useState<
-    "rgb" | "hex" | "hsl" | "cmyk"
-  >("rgb");
 
   const { t } = useTranslation();
 
-  const changeColor = (color: RgbColor): void => {
-    setRGBColor(color);
-    setHEXColor(colorHandler.rgbToHex(color));
-    setHSLColor(colorHandler.rgbToHsl(color));
-    setCMYKColor(colorHandler.rgbToCmyk(color));
+  const changeRGBColor = (rgbColor: RgbColor): void => {
+    setRGBColor(rgbColor);
+    setHEXColor(colorHandler.rgbToHex(rgbColor));
+    setHSLColor(colorHandler.rgbToHsl(rgbColor));
+    setCMYKColor(colorHandler.rgbToCmyk(rgbColor));
+  };
+
+  const changeHexColor = (hexColor: string): void => {
+    setHEXColor(hexColor);
+    setRGBColor(colorHandler.hexToRgb(hexColor));
+    setHSLColor(colorHandler.hexToHsl(hexColor));
+    setCMYKColor(colorHandler.hexToCmyk(hexColor));
+  };
+
+  const changeHSLColor = (hslColor: HslColor): void => {
+    setHSLColor(hslColor);
+    setRGBColor(colorHandler.hslToRgb(hslColor));
+    setHEXColor(colorHandler.hslToHex(hslColor));
+    setCMYKColor(colorHandler.hslToCmyk(hslColor));
+  };
+
+  const changeCMYKColor = (cmykColor: CMYKColor): void => {
+    setCMYKColor(cmykColor);
+    setRGBColor(colorHandler.cmykToRgb(cmykColor));
+    setHEXColor(colorHandler.cmykToHex(cmykColor));
+    setHSLColor(colorHandler.cmykToHsl(cmykColor));
   };
 
   const changeRGBInputColor = (
@@ -44,18 +62,20 @@ const ColorConverter = () => {
     if (!/^\d{0,3}$/.test(inputValue)) return;
 
     if (inputValue === "") {
-      setRGBColor((prev) => ({ ...prev, [channel]: 0 })); // o dejarlo sin actualizar
+      const validRgbColor = { ...RGBColor, [channel]: 0 };
+      changeRGBColor(validRgbColor);
       return;
     }
 
     const numericValue = parseInt(inputValue, 10);
 
     if (!isNaN(numericValue) && numericValue >= 0 && numericValue <= 255) {
-      setRGBColor((prev) => ({ ...prev, [channel]: numericValue }));
+      const newRgbColor = { ...RGBColor, [channel]: numericValue };
+      changeRGBColor(newRgbColor);
     }
   };
 
-  const changeHSLColor = (
+  const changeHSLInputColor = (
     value: string,
     e: React.ChangeEvent<HTMLInputElement>
   ): void => {
@@ -71,22 +91,16 @@ const ColorConverter = () => {
     const numericValue = parseInt(inputValue, 10);
     if (isNaN(numericValue)) return;
 
-    let isValid = false;
-
     if (value === "h" && numericValue >= 0 && numericValue <= 360) {
-      isValid = true;
-      setHSLColor((prev) => ({ ...prev, h: numericValue }));
+      const newHSLColor = { ...HSLColor, h: numericValue };
+      changeHSLColor(newHSLColor);
     } else if (
       (value === "s" || value === "l") &&
       numericValue >= 0 &&
       numericValue <= 100
     ) {
-      isValid = true;
-      setHSLColor((prev) => ({ ...prev, [value]: numericValue }));
-    }
-
-    if (isValid) {
-      setLastChanged("hsl");
+      const newHSLColor = { ...HSLColor, [value]: numericValue };
+      changeHSLColor(newHSLColor);
     }
   };
 
@@ -96,8 +110,7 @@ const ColorConverter = () => {
     const inputValue = e.target.value;
 
     if (inputValue === "" || /^[0-9A-Fa-f]{0,6}$/.test(inputValue)) {
-      setLastChanged("hex");
-      setHEXColor(inputValue);
+      changeHexColor(inputValue);
     }
   };
 
@@ -118,8 +131,8 @@ const ColorConverter = () => {
     if (isNaN(numericValue)) return;
 
     if (numericValue >= 0 && numericValue <= 100) {
-      setCMYKColor((prev) => ({ ...prev, [value]: numericValue }));
-      setLastChanged("cmyk");
+      const newCMYKColor = { ...CMYKColor, [value]: numericValue };
+      changeCMYKColor(newCMYKColor);
     }
   };
 
@@ -130,40 +143,8 @@ const ColorConverter = () => {
 
     const randomRGBColor: RgbColor = { r: randomR, g: randomG, b: randomB };
 
-    changeColor(randomRGBColor);
+    changeRGBColor(randomRGBColor);
   };
-
-  useEffect(() => {
-    if (lastChanged === "rgb") {
-      setHEXColor(colorHandler.rgbToHex(RGBColor));
-      setHSLColor(colorHandler.rgbToHsl(RGBColor));
-      setCMYKColor(colorHandler.rgbToCmyk(RGBColor));
-    }
-  }, [RGBColor, lastChanged]);
-
-  useEffect(() => {
-    if (lastChanged === "hex") {
-      setRGBColor(colorHandler.hexToRgb(HEXColor));
-      setHSLColor(colorHandler.hexToHsl(HEXColor));
-      setCMYKColor(colorHandler.hexToCmyk(HEXColor));
-    }
-  }, [HEXColor, lastChanged]);
-
-  useEffect(() => {
-    if (lastChanged === "hsl") {
-      setRGBColor(colorHandler.hslToRgb(HSLColor));
-      setHEXColor(colorHandler.hslToHex(HSLColor));
-      setCMYKColor(colorHandler.hslToCmyk(HSLColor));
-    }
-  }, [HSLColor, lastChanged]);
-
-  useEffect(() => {
-    if (lastChanged === "cmyk") {
-      setRGBColor(colorHandler.cmykToRgb(CMYKColor));
-      setHEXColor(colorHandler.cmykToHex(CMYKColor));
-      setHSLColor(colorHandler.cmykToHsl(CMYKColor));
-    }
-  }, [CMYKColor, lastChanged]);
 
   return (
     <div className="dark:bg-background min-h-[100dvh] flex items-center justify-center max-md:pt-32">
@@ -181,7 +162,7 @@ const ColorConverter = () => {
             <RgbColorPicker
               color={RGBColor}
               style={{ width: "300px", height: "300px" }}
-              onChange={(color) => changeColor(color)}
+              onChange={(color) => changeRGBColor(color)}
             />
           </div>
           <div className="flex flex-col items-start justify-center gap-10 w-[400px]">
@@ -240,7 +221,6 @@ const ColorConverter = () => {
                   value={HEXColor}
                   onChange={changeHEXInputColor}
                   maxLength={6}
-                  placeholder="Enter a number"
                   className="text-text-color w-20 bg-input-color pl-1 rounded-sm outline-0"
                 />
                 <MdOutlineContentCopy className="cursor-pointer text-neutral-700" />
@@ -257,7 +237,7 @@ const ColorConverter = () => {
                 <input
                   type="text"
                   value={HSLColor.h}
-                  onChange={(e) => changeHSLColor("h", e)}
+                  onChange={(e) => changeHSLInputColor("h", e)}
                   maxLength={3}
                   placeholder="Enter a number"
                   className="text-text-color w-10 bg-input-color pl-1 rounded-sm outline-0"
@@ -266,7 +246,7 @@ const ColorConverter = () => {
                 <input
                   type="text"
                   value={HSLColor.s}
-                  onChange={(e) => changeHSLColor("s", e)}
+                  onChange={(e) => changeHSLInputColor("s", e)}
                   maxLength={3}
                   placeholder="Enter a number"
                   className="text-text-color w-10 bg-input-color pl-1 rounded-sm outline-0"
@@ -275,7 +255,7 @@ const ColorConverter = () => {
                 <input
                   type="text"
                   value={HSLColor.l}
-                  onChange={(e) => changeHSLColor("l", e)}
+                  onChange={(e) => changeHSLInputColor("l", e)}
                   maxLength={3}
                   placeholder="Enter a number"
                   className="text-text-color w-10 bg-input-color pl-1 rounded-sm outline-0"

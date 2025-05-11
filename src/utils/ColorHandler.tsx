@@ -191,15 +191,20 @@ export class ColorHandler {
   }
 
   hexToCmyk(hex: string): CMYKColor {
-    hex = hex.replace(/^#/, "");
+    hex = hex.replace("#", "");
 
-    if (hex.length !== 6) {
-      throw new Error("HEX debe tener 6 caracteres");
+    if (!hex || !/^[0-9A-Fa-f]{3,6}$/.test(hex)) {
+      return { c: 0, m: 0, y: 0, k: 0 };
     }
 
-    const r = parseInt(hex.slice(0, 2), 16);
-    const g = parseInt(hex.slice(2, 4), 16);
-    const b = parseInt(hex.slice(4, 6), 16);
+    let paddedHex = hex;
+    if (hex.length < 6) {
+      paddedHex = hex.padEnd(6, "0");
+    }
+
+    const r = parseInt(paddedHex.slice(0, 2), 16);
+    const g = parseInt(paddedHex.slice(2, 4), 16);
+    const b = parseInt(paddedHex.slice(4, 6), 16);
 
     const rNorm = r / 255;
     const gNorm = g / 255;
