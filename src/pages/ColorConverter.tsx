@@ -4,9 +4,15 @@ import { useTranslation } from "react-i18next";
 import { ColorHandler } from "../utils/ColorHandler";
 import { CMYKColor } from "../types";
 import { MdOutlineContentCopy } from "react-icons/md";
+import { FaCheckCircle } from "react-icons/fa";
+import ColorInputValue from "../components/ColorInputValue";
 
 const ColorConverter = () => {
   const colorHandler = new ColorHandler();
+  const timeoutRef = useRef(0);
+  const [notificationState, setNotificationState] = useState<
+    "hidden" | "showing" | "hiding"
+  >("hidden");
 
   const [RGBColor, setRGBColor] = useState<RgbColor>({
     r: 255,
@@ -54,8 +60,8 @@ const ColorConverter = () => {
   };
 
   const changeRGBInputColor = (
-    channel: string,
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
+    channel: string
   ): void => {
     const inputValue = e.target.value;
 
@@ -76,8 +82,8 @@ const ColorConverter = () => {
   };
 
   const changeHSLInputColor = (
-    value: string,
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
+    value: string
   ): void => {
     const inputValue = e.target.value;
 
@@ -115,8 +121,8 @@ const ColorConverter = () => {
   };
 
   const changeCMYKInputColor = (
-    value: string,
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
+    value: string
   ) => {
     const inputValue = e.target.value;
 
@@ -146,8 +152,45 @@ const ColorConverter = () => {
     changeRGBColor(randomRGBColor);
   };
 
+  const copyColor = (value: string) => {
+    clearTimeout(timeoutRef.current);
+
+    setNotificationState("showing");
+    navigator.clipboard.writeText(value);
+
+    timeoutRef.current = setTimeout(() => {
+      setNotificationState("hiding");
+
+      timeoutRef.current = setTimeout(() => {
+        setNotificationState("hidden");
+      }, 300);
+    }, 5000);
+  };
+
+  useEffect(() => {
+    return () => {
+      clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
   return (
-    <div className="dark:bg-background min-h-[100dvh] flex items-center justify-center max-md:pt-32">
+    <div className="dark:bg-background min-h-[100dvh] flex items-center justify-center max-md:pt-32 max-md:pb-14">
+      {notificationState !== "hidden" && (
+        <div
+          className={`
+            fixed text-sm shadow-sm bg-card-color text-text-color bottom-32 rounded-sm p-2 
+            flex items-center justify-start gap-2
+            ${
+              notificationState === "showing"
+                ? "animate-slide-up"
+                : "animate-slide-down"
+            }
+          `}
+        >
+          <FaCheckCircle className="text-md text-emerald-600" />
+          {t("colorCopied")}
+        </div>
+      )}
       <div className="bg-card-color shadow-sm p-8 flex flex-col items-start justify-center gap-6 w-[50%] max-lg:w-[90%] max-md:w-[95%]">
         <div className="flex justify-center items-start flex-col">
           <h1 className="text-2xl font-bold text-text-color">
@@ -178,34 +221,35 @@ const ColorConverter = () => {
                   <p className="text-text-color max-md:text-sm">RGB (</p>
                 </div>
                 <div className="flex items-center justify-center gap-2">
-                  <input
-                    type="text"
+                  <ColorInputValue
                     value={RGBColor.r}
-                    onChange={(e) => changeRGBInputColor("r", e)}
-                    maxLength={3}
-                    placeholder="Enter a number"
-                    className="text-text-color w-10 bg-input-color pl-1 rounded-sm outline-0"
+                    callBackFunction={(e) => changeRGBInputColor(e, "r")}
+                    maxLenght={3}
+                    width={10}
                   />
                   <span className="text-text-color max-md:text-sm">,</span>
-                  <input
-                    type="text"
+                  <ColorInputValue
                     value={RGBColor.g}
-                    onChange={(e) => changeRGBInputColor("g", e)}
-                    maxLength={3}
-                    placeholder="Enter a number"
-                    className="text-text-color w-10 bg-input-color pl-1 rounded-sm outline-0"
+                    callBackFunction={(e) => changeRGBInputColor(e, "g")}
+                    maxLenght={3}
+                    width={10}
                   />
                   <span className="text-text-color max-md:text-sm">,</span>
-                  <input
-                    type="text"
+                  <ColorInputValue
                     value={RGBColor.b}
-                    onChange={(e) => changeRGBInputColor("b", e)}
-                    maxLength={3}
-                    placeholder="Enter a number"
-                    className="text-text-color w-10 bg-input-color pl-1 rounded-sm outline-0"
+                    callBackFunction={(e) => changeRGBInputColor(e, "b")}
+                    maxLenght={3}
+                    width={10}
                   />
                   <p className="text-text-color max-md:text-sm">)</p>
-                  <MdOutlineContentCopy className="cursor-pointer text-neutral-700" />
+                  <MdOutlineContentCopy
+                    onClick={() =>
+                      copyColor(
+                        `rgb(${RGBColor.r},${RGBColor.g},${RGBColor.b})`
+                      )
+                    }
+                    className="cursor-pointer text-secondary-text-color"
+                  />
                 </div>
               </div>
               <div className="flex items-center justify-center gap-2">
@@ -216,14 +260,16 @@ const ColorConverter = () => {
                   }}
                 ></div>
                 <p className="text-text-color max-md:text-sm">HEX #</p>
-                <input
-                  type="text"
+                <ColorInputValue
                   value={HEXColor}
-                  onChange={changeHEXInputColor}
-                  maxLength={6}
-                  className="text-text-color w-20 bg-input-color pl-1 rounded-sm outline-0"
+                  callBackFunction={(e) => changeHEXInputColor(e)}
+                  maxLenght={6}
+                  width={20}
                 />
-                <MdOutlineContentCopy className="cursor-pointer text-neutral-700" />
+                <MdOutlineContentCopy
+                  onClick={() => copyColor(`#${HEXColor}`)}
+                  className="cursor-pointer text-secondary-text-color"
+                />
               </div>
               <div className="flex items-center justify-center gap-2">
                 <div
@@ -234,34 +280,35 @@ const ColorConverter = () => {
                 ></div>
 
                 <p className="text-text-color max-md:text-sm">HSL (</p>
-                <input
-                  type="text"
+                <ColorInputValue
                   value={HSLColor.h}
-                  onChange={(e) => changeHSLInputColor("h", e)}
-                  maxLength={3}
-                  placeholder="Enter a number"
-                  className="text-text-color w-10 bg-input-color pl-1 rounded-sm outline-0"
+                  callBackFunction={(e) => changeHSLInputColor(e, "h")}
+                  maxLenght={3}
+                  width={10}
                 />
                 <span className="text-text-color max-md:text-sm">,</span>
-                <input
-                  type="text"
+                <ColorInputValue
                   value={HSLColor.s}
-                  onChange={(e) => changeHSLInputColor("s", e)}
-                  maxLength={3}
-                  placeholder="Enter a number"
-                  className="text-text-color w-10 bg-input-color pl-1 rounded-sm outline-0"
+                  callBackFunction={(e) => changeHSLInputColor(e, "s")}
+                  maxLenght={3}
+                  width={10}
                 />
                 <span className="text-text-color max-md:text-sm">% ,</span>
-                <input
-                  type="text"
+                <ColorInputValue
                   value={HSLColor.l}
-                  onChange={(e) => changeHSLInputColor("l", e)}
-                  maxLength={3}
-                  placeholder="Enter a number"
-                  className="text-text-color w-10 bg-input-color pl-1 rounded-sm outline-0"
+                  callBackFunction={(e) => changeHSLInputColor(e, "l")}
+                  maxLenght={3}
+                  width={10}
                 />
                 <p className="text-text-color max-md:text-sm">% )</p>
-                <MdOutlineContentCopy className="cursor-pointer text-neutral-700" />
+                <MdOutlineContentCopy
+                  onClick={() =>
+                    copyColor(
+                      `hsl(${HSLColor.h}, ${HSLColor.s}%, ${HSLColor.l}%)`
+                    )
+                  }
+                  className="cursor-pointer text-secondary-text-color"
+                />
               </div>
               <div className="flex items-center justify-start flex-wrap gap-2">
                 <div className="flex items-center justify-center gap-1">
@@ -275,43 +322,42 @@ const ColorConverter = () => {
                 </div>
                 <div className="flex items-center justify-center">
                   <span className="text-text-color max-md:text-sm">( </span>
-                  <input
-                    type="text"
+                  <ColorInputValue
                     value={CMYKColor.c}
-                    onChange={(e) => changeCMYKInputColor("c", e)}
-                    maxLength={3}
-                    placeholder="Enter a number"
-                    className="text-text-color w-10 bg-input-color pl-1 rounded-sm outline-0"
+                    callBackFunction={(e) => changeCMYKInputColor(e, "c")}
+                    maxLenght={3}
+                    width={10}
                   />
                   <span className="text-text-color max-md:text-sm">% ,</span>
-                  <input
-                    type="text"
+                  <ColorInputValue
                     value={CMYKColor.m}
-                    onChange={(e) => changeCMYKInputColor("m", e)}
-                    maxLength={3}
-                    placeholder="Enter a number"
-                    className="text-text-color w-10 bg-input-color pl-1 rounded-sm outline-0"
+                    callBackFunction={(e) => changeCMYKInputColor(e, "m")}
+                    maxLenght={3}
+                    width={10}
                   />
                   <span className="text-text-color max-md:text-sm">% ,</span>
-                  <input
-                    type="text"
+                  <ColorInputValue
                     value={CMYKColor.y}
-                    onChange={(e) => changeCMYKInputColor("y", e)}
-                    maxLength={3}
-                    placeholder="Enter a number"
-                    className="text-text-color w-10 bg-input-color pl-1 rounded-sm outline-0"
+                    callBackFunction={(e) => changeCMYKInputColor(e, "y")}
+                    maxLenght={3}
+                    width={10}
                   />
                   <span className="text-text-color max-md:text-sm">% ,</span>
-                  <input
-                    type="text"
+                  <ColorInputValue
                     value={CMYKColor.k}
-                    onChange={(e) => changeCMYKInputColor("k", e)}
-                    maxLength={3}
-                    placeholder="Enter a number"
-                    className="text-text-color w-10 bg-input-color pl-1 rounded-sm outline-0"
+                    callBackFunction={(e) => changeCMYKInputColor(e, "k")}
+                    maxLenght={3}
+                    width={10}
                   />
                   <p className="text-text-color max-md:text-sm">%)</p>
-                  <MdOutlineContentCopy className="ml-2 cursor-pointer text-neutral-700" />
+                  <MdOutlineContentCopy
+                    onClick={() =>
+                      copyColor(
+                        `cmyk(${CMYKColor.c}%, ${CMYKColor.m}%, ${CMYKColor.y}%, ${CMYKColor.k}%)`
+                      )
+                    }
+                    className="ml-2 cursor-pointer text-secondary-text-color"
+                  />
                 </div>
               </div>
             </div>

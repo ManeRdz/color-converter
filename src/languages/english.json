@@ -1,5 +1,7 @@
 {
   "colorConverter": "Color converter",
   "colorConverterDescription": "Select and convert color codes between the RGB, HEX, HSL and CMYK models.",
-  "randomColorButton": "Random color"
+  "randomColorButton": "Random color",
+  "colorCopied": "Color copied succesfully",
+  "imageColorPicker": "Image color picker"
 }

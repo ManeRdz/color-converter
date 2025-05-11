@@ -51,7 +51,7 @@ const Layout: React.FC<LayoutProps> = ({ theme, setTheme }) => {
         </li>
         <li>
           <NavLink to="/blog" className="relative w-full group">
-            Blog
+            {t("imageColorPicker")}
             <span className="absolute left-1/2 -bottom-1 h-0.5 w-0 bg-main-color transition-all duration-300 ease-in-out group-hover:left-0 group-hover:w-full" />
           </NavLink>
         </li>
