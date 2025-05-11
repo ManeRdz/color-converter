@@ -225,21 +225,21 @@ const ColorConverter = () => {
                     value={RGBColor.r}
                     callBackFunction={(e) => changeRGBInputColor(e, "r")}
                     maxLenght={3}
-                    width={10}
+                    width={"40"}
                   />
                   <span className="text-text-color max-md:text-sm">,</span>
                   <ColorInputValue
                     value={RGBColor.g}
                     callBackFunction={(e) => changeRGBInputColor(e, "g")}
                     maxLenght={3}
-                    width={10}
+                    width={"40"}
                   />
                   <span className="text-text-color max-md:text-sm">,</span>
                   <ColorInputValue
                     value={RGBColor.b}
                     callBackFunction={(e) => changeRGBInputColor(e, "b")}
                     maxLenght={3}
-                    width={10}
+                    width={"40"}
                   />
                   <p className="text-text-color max-md:text-sm">)</p>
                   <MdOutlineContentCopy
@@ -264,7 +264,7 @@ const ColorConverter = () => {
                   value={HEXColor}
                   callBackFunction={(e) => changeHEXInputColor(e)}
                   maxLenght={6}
-                  width={20}
+                  width={"80"}
                 />
                 <MdOutlineContentCopy
                   onClick={() => copyColor(`#${HEXColor}`)}
@@ -284,21 +284,21 @@ const ColorConverter = () => {
                   value={HSLColor.h}
                   callBackFunction={(e) => changeHSLInputColor(e, "h")}
                   maxLenght={3}
-                  width={10}
+                  width={"40"}
                 />
                 <span className="text-text-color max-md:text-sm">,</span>
                 <ColorInputValue
                   value={HSLColor.s}
                   callBackFunction={(e) => changeHSLInputColor(e, "s")}
                   maxLenght={3}
-                  width={10}
+                  width={"40"}
                 />
                 <span className="text-text-color max-md:text-sm">% ,</span>
                 <ColorInputValue
                   value={HSLColor.l}
                   callBackFunction={(e) => changeHSLInputColor(e, "l")}
                   maxLenght={3}
-                  width={10}
+                  width={"40"}
                 />
                 <p className="text-text-color max-md:text-sm">% )</p>
                 <MdOutlineContentCopy
@@ -326,28 +326,28 @@ const ColorConverter = () => {
                     value={CMYKColor.c}
                     callBackFunction={(e) => changeCMYKInputColor(e, "c")}
                     maxLenght={3}
-                    width={10}
+                    width={"40"}
                   />
                   <span className="text-text-color max-md:text-sm">% ,</span>
                   <ColorInputValue
                     value={CMYKColor.m}
                     callBackFunction={(e) => changeCMYKInputColor(e, "m")}
                     maxLenght={3}
-                    width={10}
+                    width={"40"}
                   />
                   <span className="text-text-color max-md:text-sm">% ,</span>
                   <ColorInputValue
                     value={CMYKColor.y}
                     callBackFunction={(e) => changeCMYKInputColor(e, "y")}
                     maxLenght={3}
-                    width={10}
+                    width={"40"}
                   />
                   <span className="text-text-color max-md:text-sm">% ,</span>
                   <ColorInputValue
                     value={CMYKColor.k}
                     callBackFunction={(e) => changeCMYKInputColor(e, "k")}
                     maxLenght={3}
-                    width={10}
+                    width={"40"}
                   />
                   <p className="text-text-color max-md:text-sm">%)</p>
                   <MdOutlineContentCopy

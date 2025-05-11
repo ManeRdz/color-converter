@@ -5,7 +5,7 @@ interface ColorInputValueProps {
     value?: string
   ) => void;
   maxLenght: number;
-  width: number;
+  width: string;
 }
 
 const ColorInputValue = ({
@@ -20,7 +20,8 @@ const ColorInputValue = ({
       value={value}
       onChange={callBackFunction}
       maxLength={maxLenght}
-      className={`text-text-color w-${width} bg-input-color pl-1 rounded-sm outline-0`}
+      style={{ width: `${width}px` }}
+      className={`text-text-color bg-input-color pl-1 rounded-sm outline-0`}
     />
   );
 };
