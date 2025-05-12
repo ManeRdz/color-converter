@@ -3,5 +3,7 @@
   "colorConverterDescription": "Selecciona y transforma códigos de colores entre los modelos RGB, HEX, HSL y CMYK.",
   "randomColorButton": "Color aleatorio",
   "colorCopied": "Color copiado exitosamente",
-  "imageColorPicker": "Selector de color de imagen"
+  "imageColorPicker": "Selector de color de imagen",
+  "imageColorPickerDescription": "Sube una imagen y haz click para obtener los colores instantaneamente.",
+  "dragAndDropPlaceHolder": "Arrastra y suelta una imagen aquí o haz click para seleccionar una"
 }

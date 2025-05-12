@@ -38,7 +38,7 @@ const Layout: React.FC<LayoutProps> = ({ theme, setTheme }) => {
   };
 
   return (
-    <header className="shadow-sm max-h-[150px] min-h-[100px] w-[100dvw] fixed flex items-center justify-evenly font-title bg-background text-text-color">
+    <header className="z-10 shadow-sm max-h-[150px] min-h-[100px] w-[100dvw] fixed flex items-center justify-evenly font-title bg-background text-text-color">
       <NavLink to="/color-converter" className="">
         LOGO
       </NavLink>
@@ -50,7 +50,7 @@ const Layout: React.FC<LayoutProps> = ({ theme, setTheme }) => {
           </NavLink>
         </li>
         <li>
-          <NavLink to="/blog" className="relative w-full group">
+          <NavLink to="/image-color-picker" className="relative w-full group">
             {t("imageColorPicker")}
             <span className="absolute left-1/2 -bottom-1 h-0.5 w-0 bg-main-color transition-all duration-300 ease-in-out group-hover:left-0 group-hover:w-full" />
           </NavLink>
@@ -76,7 +76,7 @@ const Layout: React.FC<LayoutProps> = ({ theme, setTheme }) => {
             </p>
           </button>
           {showThemeSelector && (
-            <div className="absolute shadow-lg text-sm flex items-start gap-1 p-4 justify-center flex-col w-40 min-h-24 bg-card-color right-0 top-11 rounded-sm">
+            <div className="z-10 absolute shadow-lg text-sm flex items-start gap-1 p-4 justify-center flex-col w-40 min-h-24 bg-card-color right-0 top-11 rounded-sm">
               <button
                 onClick={() => selectTheme("light")}
                 className="hover:bg-gray-200 dark:hover:bg-neutral-800 cursor-pointer flex items-center justify-start gap-1 w-full py-1 px-2 rounded-sm"
