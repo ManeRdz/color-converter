@@ -1,7 +1,8 @@
-import { useCallback, useRef, useState } from "react";
-import { useDropzone } from "react-dropzone";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FaCheckCircle, FaTrash } from "react-icons/fa";
+import DragAndDrop from "../components/DragAndDrop";
+import { FaFileImage } from "react-icons/fa";
 
 const ImageColorPicker = () => {
   const { t } = useTranslation();
@@ -13,21 +14,6 @@ const ImageColorPicker = () => {
     "hidden" | "showing" | "hiding"
   >("hidden");
   const timeoutRef = useRef(0);
-
-  const onDrop = useCallback((acceptedFiles: Blob[]) => {
-    acceptedFiles.forEach((acceptedFile) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const binaryStr = reader.result?.toString();
-        openEyeDropper();
-        setImage(binaryStr);
-      };
-
-      reader.readAsDataURL(acceptedFile);
-    });
-  }, []);
-
-  const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
   const openEyeDropper = async () => {
     if (!("EyeDropper" in window)) {
@@ -59,12 +45,32 @@ const ImageColorPicker = () => {
     }, 5000);
   };
 
+  const isLightColor = (hex: string): boolean => {
+    hex = hex.replace("#", "");
+
+    if (hex.length === 3) {
+      hex = hex
+        .split("")
+        .map((c) => c + c)
+        .join("");
+    }
+
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+
+    const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+    return luminance > 180;
+  };
+
   return (
-    <div className="relative dark:bg-background min-h-[100dvh] flex items-center justify-center max-md:pt-32 max-md:pb-14">
-      {notificationState !== "hidden" && (
-        <div
-          className={`
-                    fixed text-sm shadow-sm bg-card-color text-text-color bottom-32 rounded-sm p-2 
+    <div className="relative flex flex-wrap min-h-[100dvh] dark:bg-background items-start justify-start max-md:pb-14 px-4 ">
+      <div className="flex-[1_1_200px] min-h-[100dvh] max-w-full shadow-md max-sm:min-h-fit bg-card-color dark:bg-card-color flex flex-col gap-8 p-10 pt-[150px] ">
+        {notificationState !== "hidden" && (
+          <div
+            className={`
+                    fixed max-sm:text-xs text-sm shadow-lg bg-background text-text-color bottom-28 max-sm:left-24 left-35 rounded-sm p-2 
                     flex items-center justify-start gap-2 z-10
                     ${
                       notificationState === "showing"
@@ -72,75 +78,63 @@ const ImageColorPicker = () => {
                         : "animate-slide-down"
                     }
                   `}
-        >
-          <FaCheckCircle className="text-md text-emerald-600" />
-          {t("colorCopied")}
-        </div>
-      )}
-      <div
-        className="absolute w-full h-full bg-no-repeat bg-center filter blur-sm z-0"
-        style={{ backgroundImage: `url(${image})` }}
-      ></div>
-      <div className="relative z-9 bg-card-color shadow-sm p-8 flex flex-col items-start justify-start gap-6 w-[50%] min-h-[500px] max-lg:w-[90%] max-md:w-[95%]">
-        <div className="flex items-start justify-center flex-col gap-14 w-full">
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-start justify-center flex-col gap-1">
-              <h1 className="text-2xl font-bold text-text-color">
-                {t("imageColorPicker")}
-              </h1>
-              <h3 className="text-sm text-secondary-text-color">
-                {t("imageColorPickerDescription")}
-              </h3>
-            </div>
-            {image && (
-              <div className="flex items-start justify-center flex-col gap-2">
-                <button
-                  onClick={removeImage}
-                  className="text-secondary-text-color text-sm cursor-pointer flex items-center gap-1"
-                >
-                  <FaTrash />
-                  Remove image
-                </button>
-              </div>
-            )}
+          >
+            <FaCheckCircle className="text-md text-emerald-600" />
+            {t("colorCopied")}
           </div>
-          {!image && (
-            <div className="w-full flex items-center justify-center">
-              <div
-                className="relative w-[70%] h-[300px] cursor-pointer border-1 border-secondary-text-color border-dotted flex items-center justify-center "
-                {...getRootProps()}
-              >
-                <input {...getInputProps()} placeholder="" className="hidden" />
-                <div className="absolute text-text-color pointer-events-none">
-                  {t("dragAndDropPlaceHolder")}
-                </div>
-              </div>
-            </div>
-          )}
+        )}
+        <div className="flex items-start justify-center flex-col">
+          <h1 className="text-text-color font-semibold">
+            {t("imageColorPicker")}
+          </h1>
+          <h3 className="text-secondary-text-color">
+            {t("imageColorPickerDescription")}
+          </h3>
+        </div>
+        <div className="w-[400px] max-sm:w-[90%] ">
+          <DragAndDrop openEyeDropper={openEyeDropper} setImage={setImage} />
+        </div>
 
-          {image && (
-            <div className="flex items-start justify-center">
-              <div className="w-full flex items-center justify-center">
-                <img
-                  onClick={openEyeDropper}
-                  className="w-[60%] object-cover"
-                  src={image ?? ""}
-                  alt="Sample image"
-                />
-              </div>
-              <div
-                style={{ backgroundColor: color }}
-                onClick={copyColor}
-                className="relative w-[20%] h-[100px] flex items-center justify-center cursor-pointer group rounded-sm"
-              >
-                <span className="text-white font-medium z-10">{color}</span>
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                  <span className="text-white text-sm">
-                    Click to copy color
-                  </span>
-                </div>
-              </div>
-            </div>
+        <div
+          className="shadow-md relative w-[400px] max-sm:w-[90%]  h-[200px] flex items-center justify-center cursor-pointer group"
+          style={{ backgroundColor: color }}
+          onClick={copyColor}
+        >
+          <span
+            className={`${
+              isLightColor(color) ? "text-neutral-600" : "text-neutral-100"
+            } font-medium z-9`}
+          >
+            {color}
+          </span>
+
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20">
+            <span className="text-white text-sm">Click to copy color</span>
+          </div>
+        </div>
+        <div className="w-[80%] flex">
+          <button
+            onClick={removeImage}
+            className="hover:scale-105 transition-transform ease-in rounded-sm flex items-center justify-center gap-1 text-sm p-2 cursor-pointer hover: text-secondary-text-color"
+          >
+            <FaTrash /> {t("removeImage")}
+          </button>
+        </div>
+      </div>
+      <div className="flex-[1_1_800px] p-2 max-w-full flex items-center justify-center bg-background relative min-h-[100dvh] ">
+        <div
+          className="absolute inset-0 bg-no-repeat bg-center bg-cover filter blur-xs z-0"
+          style={{ backgroundImage: `url(${image})` }}
+        ></div>
+        <div className="w-[700px] h-[500px] bg-card-color shadow-sm flex items-center justify-center">
+          {!image ? (
+            <FaFileImage className="text-4xl text-secondary-text-color" />
+          ) : (
+            <img
+              onClick={openEyeDropper}
+              src={image}
+              className="z-1 w-full h-full object-cover"
+            />
           )}
         </div>
       </div>
