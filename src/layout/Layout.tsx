@@ -11,6 +11,7 @@ import "../languages/i18n";
 import { IoClose } from "react-icons/io5";
 import { BiMenuAltRight } from "react-icons/bi";
 import { useTranslation } from "react-i18next";
+import logo2 from "../assets/logo2.png";
 
 interface LayoutProps {
   setTheme: React.Dispatch<React.SetStateAction<theme>>;
@@ -54,9 +55,6 @@ const Layout: React.FC<LayoutProps> = ({ theme, setTheme }) => {
         >
           <IoClose className="text-text-color text-3xl" />
         </button>
-        <NavLink to="/color-converter" className="text-text-color">
-          LOGO
-        </NavLink>
         <ul className="flex items-center justify-center flex-col gap-10">
           <li>
             <NavLink
@@ -147,8 +145,12 @@ const Layout: React.FC<LayoutProps> = ({ theme, setTheme }) => {
         </div>
       </div>
       <header className="max-sm:pl-12 max-sm:justify-between z-10 shadow-sm max-h-[150px] min-h-[100px] w-[100dvw] fixed flex items-center justify-evenly font-title bg-background text-text-color">
-        <NavLink to="/color-converter" className="">
-          LOGO
+        <NavLink
+          to="/color-converter"
+          className="flex items-center justify-center font-bold"
+        >
+          <img src={logo2} alt="logo" className="w-14 object-contain" />
+          PigmentaKit
         </NavLink>
         <button
           onClick={() => {
